@@ -150,7 +150,6 @@ const ImageProcessor: React.FC = () => {
 
     const img = new Image();
     img.src = image as string;
-    console.log(image as string);
 
     await new Promise((resolve) => (img.onload = resolve));
 
@@ -177,9 +176,6 @@ const ImageProcessor: React.FC = () => {
       canvas.width,
       canvas.height,
     );
-
-    canvas.style.display = "none";
-    document.body.appendChild(canvas);
 
     const croppedImage = canvas.toDataURL("image/jpeg");
     return croppedImage;
