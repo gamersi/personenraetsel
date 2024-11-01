@@ -144,15 +144,21 @@ const ImageProcessor: React.FC = () => {
 
   const handleTouchEnd = () => setIsDragging(false);
 
-  const getCroppedImage = (): string => {
+  const getCroppedImage = async (): Promise<string> => {
     const canvas = document.createElement("canvas");
     if (!imageRef.current) return "";
 
-    const img = imageRef.current.querySelector("img");
-    if (!img) return "";
+    const img = new Image();
+    img.src = image as string;
+    console.log(image as string);
 
-    const scaleX = imageSize.width / img.clientWidth;
-    const scaleY = imageSize.height / img.clientHeight;
+    await new Promise((resolve) => (img.onload = resolve));
+
+    const imgElement = imageRef.current.querySelector("img");
+    if (!imgElement) return "";
+
+    const scaleX = imageSize.width / imgElement.clientWidth;
+    const scaleY = imageSize.height / imgElement.clientHeight;
 
     canvas.width = crop.width * scaleX;
     canvas.height = crop.height * scaleY;
@@ -160,28 +166,23 @@ const ImageProcessor: React.FC = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return "";
 
-    const imageElement = new Image();
-    imageElement.src = image as string;
-
     ctx.drawImage(
-      imageElement,
+      img,
       crop.x * scaleX,
       crop.y * scaleY,
       crop.width * scaleX,
       crop.height * scaleY,
       0,
       0,
-      crop.width * scaleX,
-      crop.height * scaleY,
+      canvas.width,
+      canvas.height,
     );
 
     canvas.style.display = "none";
-    canvas.style.position = "absolute";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
     document.body.appendChild(canvas);
 
-    return canvas.toDataURL("image/jpeg");
+    const croppedImage = canvas.toDataURL("image/jpeg");
+    return croppedImage;
   };
 
   const performOCR = async (): Promise<void> => {
@@ -193,7 +194,7 @@ const ImageProcessor: React.FC = () => {
       const Tesseract = (await import("tesseract.js")).default;
       const worker = await Tesseract.createWorker(["eng", "deu"]);
 
-      const imageData = crop.width > 0 ? getCroppedImage() : image;
+      const imageData = crop.width > 0 ? await getCroppedImage() : image;
       if (!imageData) {
         console.error("No image data available");
         throw new Error("No image data available");
