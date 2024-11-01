@@ -79,3 +79,7 @@ img {
   -webkit-user-select: none;
   -ms-user-select: none;
 }
+
+html, body {
+  overscroll-behavior: none;
+}

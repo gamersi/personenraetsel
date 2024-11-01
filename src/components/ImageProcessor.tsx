@@ -322,7 +322,7 @@ const ImageProcessor: React.FC = () => {
                 disabled={loading}
               >
                 <Crop className="mr-2 h-4 w-4" />
-                {isCropping ? "Cancel Crop" : "Start Cropping"}
+                {isCropping ? "Stop Crop" : "Crop"}
               </Button>
               <Button onClick={performOCR} disabled={loading}>
                 {loading ? (
@@ -330,7 +330,7 @@ const ImageProcessor: React.FC = () => {
                 ) : (
                   <Camera className="mr-2 h-4 w-4" />
                 )}
-                Run Text Recognition
+                Text Recognition
               </Button>
             </div>
           )}
