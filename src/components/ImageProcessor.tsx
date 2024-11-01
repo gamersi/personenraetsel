@@ -31,7 +31,7 @@ const ImageProcessor: React.FC = () => {
     width: 0,
     height: 0,
   });
-  const [ocrText, setOcrText] = useState<string>("");
+  const [ocrText, setOcrText] = useState<string | null>(null);
   const [response, setResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +74,7 @@ const ImageProcessor: React.FC = () => {
           setImage(e.target?.result as string);
           setCrop({ x: 0, y: 0, width: 0, height: 0 });
           setError(null);
-          setOcrText("");
+          setOcrText(null);
           setResponse("");
         };
         reader.onerror = () => {
@@ -228,7 +228,12 @@ const ImageProcessor: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        throw new Error(
+          "API request failed with status: " +
+            response.status +
+            " " +
+            response.statusText,
+        );
       }
 
       const data = await response.json();
@@ -342,7 +347,7 @@ const ImageProcessor: React.FC = () => {
             </div>
           )}
 
-          {ocrText && (
+          {ocrText !== null && (
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">OCR Results:</h3>
               <Textarea
@@ -362,11 +367,20 @@ const ImageProcessor: React.FC = () => {
             </div>
           )}
 
-          {response && (
+          {response && response !== "[ERROR]" && (
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Solution:</h3>
               <div className="p-4 bg-gray-100 rounded-lg">{response}</div>
             </div>
+          )}
+
+          {response === "[ERROR]" && (
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                The AI was unable to solve the challenge. Please try again.
+              </AlertDescription>
+            </Alert>
           )}
         </CardContent>
       </Card>
