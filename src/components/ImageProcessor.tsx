@@ -23,7 +23,7 @@ interface Position {
 const ImageProcessor: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<{ width: number; height: number }>(
-    { width: 0, height: 0 }
+    { width: 0, height: 0 },
   );
   const [crop, setCrop] = useState<CropArea>({
     x: 0,
@@ -48,8 +48,8 @@ const ImageProcessor: React.FC = () => {
         setImageSize({ width, height });
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -172,8 +172,14 @@ const ImageProcessor: React.FC = () => {
       0,
       0,
       crop.width * scaleX,
-      crop.height * scaleY
+      crop.height * scaleY,
     );
+
+    canvas.style.display = "none";
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    document.body.appendChild(canvas);
 
     return canvas.toDataURL("image/jpeg");
   };
@@ -189,20 +195,22 @@ const ImageProcessor: React.FC = () => {
 
       const imageData = crop.width > 0 ? getCroppedImage() : image;
       if (!imageData) {
+        console.error("No image data available");
         throw new Error("No image data available");
       }
 
       const {
         data: { text },
       } = await worker.recognize(imageData);
-      setOcrText(text);
+
+      setOcrText(text || "No text found");
 
       await worker.terminate();
     } catch (err) {
       setError(
         `Error performing OCR: ${
           err instanceof Error ? err.message : "Unknown error"
-        }`
+        }`,
       );
     } finally {
       setLoading(false);
@@ -232,7 +240,7 @@ const ImageProcessor: React.FC = () => {
       setError(
         `Error calling ChatGPT: ${
           err instanceof Error ? err.message : "Unknown error"
-        }`
+        }`,
       );
     } finally {
       setLoading(false);
@@ -243,7 +251,9 @@ const ImageProcessor: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto p-4 space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Person Recognition Challenge | Personenrätsellösung</CardTitle>
+          <CardTitle>
+            Person Recognition Challenge | Personenrätsellösung
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
